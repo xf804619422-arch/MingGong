@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>明公诺千 - 全谷物食品</title>
+<style>
+:root {
+  --primary: #6B3A2A;
+  --primary-light: #8B5E3C;
+  --primary-dark: #4A2518;
+  --accent: #4A7C3F;
+  --accent-light: #6BA34E;
+  --gold: #C8955A;
+  --gold-light: #F0E0C8;
+  --bg: #F8F5EF;
+  --bg-card: #FFFFFF;
+  --text: #1C1411;
+  --text-secondary: #7A6E64;
+  --text-light: #B0A89C;
+  --border: #E8E2D6;
+  --red: #D4533B;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow: 0 2px 12px rgba(0,0,0,0.05);
+  --shadow-hover: 0 6px 24px rgba(0,0,0,0.10);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --tab-height: 56px;
+  --header-h: 46px;
+  --status-h: 26px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #E8E4DA;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 414px;
+  height: 100vh;
+  max-height: 900px;
+  background: var(--bg);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 50px rgba(0,0,0,0.12);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Fixed Top ===== */
+.status-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: var(--status-h);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 11px;
+  color: #1C1411;
+  font-weight: 600;
+  z-index: 50;
+}
+
+.status-bar .icons { display: flex; gap: 6px; align-items: center; }
+.status-bar .icons .battery {
+  width: 22px; height: 10px;
+  border: 1.5px solid #1C1411;
+  border-radius: 2px;
+  position: relative;
+}
+.status-bar .icons .battery::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 2px;
+  width: 2px; height: 4px;
+  background: #1C1411;
+  border-radius: 0 1px 1px 0;
+}
+.status-bar .icons .battery .fill {
+  display: block;
+  height: 100%;
+  width: 75%;
+  background: #1C1411;
+}
+
+.header {
+  position: absolute;
+  top: var(--status-h);
+  left: 0; right: 0;
+  height: var(--header-h);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  z-index: 50;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 16px; right: 16px;
+  height: 0.5px;
+  background: rgba(0,0,0,0.06);
+}
+
+.header .title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.header .back-btn {
+  position: absolute;
+  left: 16px;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: rgba(0,0,0,0.04);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.header .back-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.header .back-btn:active { background: rgba(0,0,0,0.1); }
+
+.header .back-btn svg {
+  width: 18px; height: 18px;
+  color: #333;
+}
+
+/* ===== Main Content ===== */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--status-h) + var(--header-h));
+  padding-bottom: var(--tab-height);
+  scroll-behavior: smooth;
+}
+
+.main-content::-webkit-scrollbar { display: none; }
+
+.page { display: none; }
+.page.active { display: block; }
+#page-all.active { display: block; height: 100%; }
+#page-detail.active { display: block; }
+
+/* ===== Fixed Bottom Tab ===== */
+.tab-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-height);
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 50;
+}
+
+.tab-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 16px; right: 16px;
+  height: 0.5px;
+  background: rgba(0,0,0,0.05);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 3px;
+  transition: color 0.25s;
+  color: var(--text-light);
+  font-size: 10px;
+  border: none;
+  background: none;
+  padding: 2px 0;
+  font-family: inherit;
+}
+
+.tab-item.active { color: var(--primary); }
+
+.tab-item .tab-icon {
+  width: 22px; height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.25s;
+}
+
+.tab-item.active .tab-icon { transform: translateY(-1px); }
+
+.tab-item .tab-icon svg {
+  width: 22px; height: 22px;
+}
+
+.tab-item .tab-badge {
+  position: absolute;
+  top: -2px; right: -6px;
+  min-width: 16px; height: 16px;
+  background: var(--red);
+  color: #FFF;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+/* ============ HOME PAGE ============ */
+
+/* Search Bar */
+.search-bar {
+  padding: 10px 14px 0;
+}
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #FFF;
+  border-radius: 22px;
+  padding: 9px 14px;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.search-input-wrap:active { box-shadow: var(--shadow-hover); }
+.search-input-wrap svg {
+  width: 16px; height: 16px;
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+.search-input-wrap .search-placeholder {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+/* Banner */
+.banner-wrap { padding: 12px 14px; }
+.banner-carousel {
+  position: relative;
+  height: 170px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.banner-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.banner-slide {
+  min-width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.banner-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%);
+  border-radius: var(--radius);
+}
+
+.banner-slide .banner-text {
+  position: relative;
+  z-index: 2;
+  color: #FFF;
+}
+
+.banner-slide .banner-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.banner-slide .banner-subtitle {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 4px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.banner-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: -24px;
+  position: relative;
+  z-index: 3;
+  padding-bottom: 4px;
+}
+
+.banner-dot {
+  width: 6px; height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.5);
+  transition: all 0.35s;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.banner-dot.active {
+  width: 20px;
+  background: #FFF;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* Notice Bar */
+.notice-bar {
+  margin: 8px 14px;
+  background: #FFF;
+  border-radius: 22px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.notice-bar .notice-icon {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notice-bar .notice-icon svg {
+  width: 16px; height: 16px;
+  color: var(--gold);
+}
+
+.notice-bar .notice-text {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.notice-bar .notice-text .scroll-wrap {
+  display: inline-block;
+  animation: noticeScroll 12s linear infinite;
+  padding-left: 100%;
+}
+
+@keyframes noticeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Category Grid */
+.category-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 2px 14px 8px;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 10px 2px;
+  border-radius: var(--radius-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.category-item:active {
+  transform: scale(0.94);
+}
+
+.category-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: var(--gold-light);
+}
+
+.category-icon svg { width: 30px; height: 30px; }
+
+.category-item .cat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 14px 8px;
+}
+
+.section-header .section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  text-align: center;
+  position: relative;
+}
+
+.section-header .section-title::after {
+  content: '';
+  display: block;
+  width: 25px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  margin: 4px auto 0;
+}
+
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 4px 14px;
+}
+
+.product-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-card:active {
+  transform: scale(0.97);
+  box-shadow: var(--shadow-hover);
+}
+
+.product-card .product-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.product-card .product-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.03) 100%);
+}
+
+.product-card .share-tag {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 0.5px solid rgba(0,0,0,0.06);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.product-card .share-tag:active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.product-card .share-tag svg {
+  width: 14px; height: 14px;
+  color: var(--text-secondary);
+  transition: color 0.25s;
+}
+
+.product-card .share-tag:active svg { color: #FFF; }
+
+.product-info { padding: 10px 12px 14px; }
+
+.product-info .product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.product-info .product-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.product-info .product-tag {
+  font-size: 10px;
+  color: var(--accent);
+  background: #EDF4E8;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.product-info .product-tag.hot {
+  color: var(--red);
+  background: #FFF0EC;
+}
+
+.product-info .product-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.product-info .price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+.product-info .price .unit {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.product-info .sold-count {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.share-text-btn {
+  padding: 5px 14px;
+  border-radius: 4px;
+  background: var(--primary);
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #FFF;
+  font-weight: 600;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.share-text-btn:active {
+  background: var(--primary-dark);
+  color: #FFF;
+}
+
+/* Rush Scroll */
+.rush-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 14px 8px;
+}
+
+.rush-scroll::-webkit-scrollbar { display: none; }
+
+.rush-card {
+  flex-shrink: 0;
+  width: 120px;
+  background: #FFF;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.rush-card:active { transform: scale(0.96); }
+
+.rush-card .rush-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.rush-card .rush-info {
+  padding: 8px;
+}
+
+.rush-card .rush-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.rush-card .rush-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--red);
+}
+
+/* Oat Banner */
+.oat-banner {
+  margin: 4px 14px 12px;
+  height: 160px;
+  border-radius: var(--radius);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.oat-banner-overlay {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(107,58,42,0.55) 0%, rgba(74,37,24,0.3) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+}
+
+.oat-banner-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.oat-banner-subtitle {
+  font-size: 13px;
+  margin-top: 4px;
+  opacity: 0.9;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+/* Brand Strip */
+.brand-strip {
+  margin: 12px 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.brand-item {
+  background: #FFF;
+  border-radius: var(--radius-sm);
+  padding: 14px 8px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  cursor: default;
+}
+
+.brand-item .bi-icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--gold-light);
+}
+
+.brand-item .bi-icon svg {
+  width: 18px; height: 18px;
+  color: var(--primary);
+}
+
+.brand-item .bi-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.brand-item .bi-desc {
+  font-size: 10px;
+  color: var(--text-light);
+}
+
+/* Home Bottom Spacer */
+.home-bottom { height: 12px; }
+
+/* ============ ALL PRODUCTS PAGE ============ */
+.all-page-layout {
+  display: flex;
+  height: 100%;
+}
+
+.left-cat-panel {
+  width: 100px;
+  flex-shrink: 0;
+  background: #FFF;
+  overflow-y: auto;
+  border-right: 0.5px solid var(--border);
+}
+
+.left-cat-panel .cat-side-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  transition: color 0.2s, background 0.2s;
+}
+
+.left-cat-panel .cat-side-item.active {
+  color: var(--primary);
+  font-weight: 700;
+  background: rgba(107,58,42,0.04);
+}
+
+.left-cat-panel .cat-side-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--primary);
+  border-radius: 0 2px 2px 0;
+}
+
+.right-product-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 10px 16px;
+}
+
+.right-product-area .product-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+}
+
+.right-product-area .product-card-row {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.product-card-row:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-hover);
+}
+
+.product-card-row .pr-img {
+  width: 110px;
+  height: 110px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.product-card-row .pr-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-card-row .pr-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card-row .pr-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.product-card-row .pr-tag {
+  font-size: 10px;
+  color: var(--accent);
+  background: #EDF4E8;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.product-card-row .pr-tag.hot {
+  color: var(--red);
+  background: #FFF0EC;
+}
+
+.product-card-row .pr-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-card-row .pr-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+.product-card-row .pr-price .unit {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Order Tabs */
+.order-filter-tabs {
+  display: flex;
+  gap: 0;
+  padding: 12px 14px 4px;
+  background: #FFF;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.order-filter-tab {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.25s;
+  text-align: center;
+}
+
+.order-filter-tab.active {
+  color: var(--primary);
+  font-weight: 700;
+  position: relative;
+}
+
+.order-filter-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.order-date-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #FFF;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.order-date-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.order-date-input {
+  width: 115px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: #F8F5EF;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+
+.order-date-input:focus { border-color: var(--primary); }
+
+.order-date-sep { color: var(--text-light); }
+
+/* ============ SEARCH PAGE ============ */
+.search-page-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #FFF;
+  border-radius: 24px;
+  padding: 10px 16px;
+  margin: 14px;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-page-input-wrap svg {
+  width: 18px; height: 18px;
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.search-page-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.search-page-input::placeholder {
+  color: var(--text-light);
+}
+
+.search-hot {
+  padding: 0 14px 12px;
+}
+
+.search-hot-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.search-hot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hot-tag {
+  padding: 6px 14px;
+  background: #FFF;
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.hot-tag:active {
+  background: var(--primary);
+  color: #FFF;
+}
+
+/* ============ ORDER PAGE ============ */
+.order-list {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.order-card:active {
+  box-shadow: var(--shadow-hover);
+  transform: scale(0.99);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.order-no {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.order-no .label {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.order-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.order-status.completed { background: #EDF4E8; color: var(--accent); }
+.order-status.shipping { background: #FFF8E1; color: #C8955A; }
+.order-status.pending { background: #F5F5F5; color: #999; }
+.order-status.canceled { background: #FFF0F0; color: #C0392B; }
+
+.order-products {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-product-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.order-product-item .op-img {
+  width: 56px; height: 56px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.order-product-item .op-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.order-product-item .op-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+
+.order-product-item .op-spec {
+  font-size: 10px;
+  color: var(--text-light);
+  margin-bottom: 2px;
+}
+
+.order-product-item .op-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.order-product-item .op-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1C1411;
+}
+
+.order-product-item .op-qty {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.order-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.order-total .total-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1C1411;
+}
+
+.order-actions { display: flex; gap: 8px; }
+
+.order-btn {
+  padding: 7px 16px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.order-btn.outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.order-btn.outline:active {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.order-btn.primary {
+  background: var(--primary);
+  color: #FFF;
+}
+.order-btn.primary:active { background: var(--primary-dark); }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+.empty-state .empty-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: #F5F5F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.empty-state .empty-icon svg {
+  width: 36px; height: 36px;
+  color: #CCC;
+}
+.empty-state .empty-text {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* ============ SHARE PANEL ============ */
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.share-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.share-panel {
+  background: #FFF;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 414px;
+  padding: 24px 20px 34px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.share-overlay.show .share-panel { transform: translateY(0); }
+
+.share-panel .share-title {
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.share-options {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  margin-bottom: 28px;
+}
+
+.share-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+  transition: transform 0.15s;
+}
+
+.share-option:active { transform: scale(0.9); }
+
+.share-option .share-icon-circle {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.share-icon-circle.wechat { background: #07C160; }
+.share-icon-circle.moments { background: #2AAE67; }
+.share-icon-circle.poster { background: var(--primary); }
+
+.share-icon-circle svg {
+  width: 28px; height: 28px;
+  color: #FFF;
+}
+
+.share-panel .share-cancel {
+  width: 100%;
+  padding: 13px;
+  background: #F5F5F5;
+  border: none;
+  border-radius: 26px;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.share-panel .share-cancel:active { background: #E8E8E8; }
+
+/* ============ POSTER MODAL ============ */
+.poster-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  gap: 20px;
+  padding: 20px;
+}
+
+.poster-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.poster-modal .poster-hint {
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+  text-align: center;
+}
+
+.poster-modal canvas {
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  max-width: 85vw;
+  max-height: 60vh;
+}
+
+.poster-modal .poster-actions { display: flex; gap: 14px; }
+
+.poster-btn {
+  padding: 11px 28px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.poster-btn.save {
+  background: #FFF;
+  color: var(--text);
+}
+
+.poster-btn.save:active { background: #E8E8E8; }
+
+.poster-btn.close {
+  background: rgba(255,255,255,0.15);
+  color: #FFF;
+  backdrop-filter: blur(4px);
+}
+
+.poster-btn.close:active { background: rgba(255,255,255,0.3); }
+
+/* ============ TOAST ============ */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0,0,0,0.8);
+  color: #FFF;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-weight: 500;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ============ DETAIL PAGE ============ */
+.detail-page-img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background-size: cover;
+  background-position: center;
+}
+
+.detail-page-info { padding: 20px; }
+
+.detail-page-info .detail-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.detail-page-info .detail-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1C1411;
+  margin-bottom: 14px;
+}
+
+.detail-page-info .detail-price .unit {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.detail-page-info .detail-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.detail-page-info .detail-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.detail-page-info .spec-tag {
+  padding: 7px 16px;
+  background: var(--bg);
+  border-radius: 18px;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.detail-bottom {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 28px;
+}
+
+.detail-bottom .btn-share {
+  flex: 1;
+  padding: 13px;
+  border-radius: 26px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  background: var(--primary);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: background 0.2s;
+  box-shadow: 0 4px 16px rgba(107,58,42,0.2);
+}
+
+.detail-bottom .btn-share:active { background: var(--primary-dark); }
+
+.detail-bottom .btn-share svg {
+  width: 18px; height: 18px;
+}
+
+.detail-images-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 0 20px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-images-grid .detail-image-item {
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-sm);
+  aspect-ratio: 1;
+}
+
+.detail-share-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 414px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 10px 20px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0));
+  z-index: 40;
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.06);
+}
+
+.detail-share-bar .btn-share {
+  flex: 1;
+  padding: 13px;
+  border-radius: 26px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  background: var(--primary);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: background 0.2s;
+  box-shadow: 0 4px 16px rgba(107,58,42,0.2);
+}
+
+.detail-share-bar .btn-share:active { background: var(--primary-dark); }
+
+.detail-share-bar .btn-share svg {
+  width: 18px; height: 18px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 440px) {
+  .app-container {
+    border-radius: 0;
+    max-height: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span style="font-size:12px;">●●●●○</span>
+      <span style="font-size:10px;">WiFi</span>
+      <span class="battery"><span class="fill"></span></span>
+    </div>
+  </div>
+
+  <!-- 顶部标题栏 -->
+  <div class="header">
+    <button class="back-btn" id="backBtn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <span class="title" id="headerTitle">明公诺千·全谷物大健康</span>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content" id="mainContent">
+
+    <!-- ====== 首页 ====== -->
+    <div class="page active" id="page-home">
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <div class="search-input-wrap" onclick="switchTab('search')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="search-placeholder">搜索全谷物好物</span>
+        </div>
+      </div>
+
+      <!-- 轮播Banner -->
+      <div class="banner-wrap">
+        <div class="banner-carousel" id="bannerCarousel">
+          <div class="banner-track" id="bannerTrack">
+            <div class="banner-slide" style="background-image:url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=870&h=340&fit=crop')">
+              <div class="banner-text">
+                <div class="banner-title">天然全谷物</div>
+                <div class="banner-subtitle">每一口都是大自然的馈赠</div>
+              </div>
+            </div>
+            <div class="banner-slide" style="background-image:url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=870&h=340&fit=crop')">
+              <div class="banner-text">
+                <div class="banner-title">有机认证专区</div>
+                <div class="banner-subtitle">严选有机，健康无忧</div>
+              </div>
+            </div>
+            <div class="banner-slide" style="background-image:url('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=870&h=340&fit=crop')">
+              <div class="banner-text">
+                <div class="banner-title">谷物营养早餐</div>
+                <div class="banner-subtitle">开启元气满满的一天</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="banner-dots" id="bannerDots">
+          <button class="banner-dot active" data-idx="0"></button>
+          <button class="banner-dot" data-idx="1"></button>
+          <button class="banner-dot" data-idx="2"></button>
+        </div>
+      </div>
+
+      <!-- 公告栏 -->
+      <div class="notice-bar">
+        <span class="notice-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </span>
+        <div class="notice-text">
+          <span class="scroll-wrap">新用户首单享9折优惠  |  端午礼盒火热预售中  |  满128元包邮到家  |  每日签到领谷物知识卡  </span>
+        </div>
+      </div>
+
+      <!-- 分类入口 -->
+      <div class="category-row">
+        <button class="category-item" onclick="switchToAll('oat')">
+          <div class="category-icon">
+            <svg viewBox="0 0 56 56" fill="none">
+              <ellipse cx="28" cy="22" rx="22" ry="13" fill="#D4A76A"/>
+              <path d="M6 22c0 7.18 9.85 13 22 13s22-5.82 22-13" fill="#C8955A"/>
+              <ellipse cx="28" cy="20" rx="18" ry="9" fill="#E8C888"/>
+              <circle cx="18" cy="20" r="2.5" fill="#F5E6C8"/>
+              <circle cx="28" cy="18" r="2.5" fill="#F5E6C8"/>
+              <circle cx="38" cy="20" r="2.5" fill="#F5E6C8"/>
+              <ellipse cx="28" cy="26" rx="15" ry="4" fill="#F0DCA0" opacity="0.6"/>
+            </svg>
+          </div>
+          <span class="cat-label">燕麦麸皮</span>
+        </button>
+        <button class="category-item" onclick="switchToAll('quinoa')">
+          <div class="category-icon">
+            <svg viewBox="0 0 56 56" fill="none">
+              <circle cx="28" cy="28" r="22" fill="#D4C4A8"/>
+              <circle cx="18" cy="20" r="5" fill="#B8956A"/>
+              <circle cx="38" cy="20" r="5" fill="#96785A"/>
+              <circle cx="28" cy="34" r="5" fill="#A08060"/>
+              <circle cx="14" cy="34" r="5" fill="#C8A878"/>
+              <circle cx="42" cy="34" r="5" fill="#8B7355"/>
+              <circle cx="22" cy="28" r="5" fill="#D4B88C"/>
+              <circle cx="34" cy="28" r="5" fill="#BC9A6E"/>
+            </svg>
+          </div>
+          <span class="cat-label">藜麦谷物</span>
+        </button>
+        <button class="category-item" onclick="switchToAll('rice')">
+          <div class="category-icon">
+            <svg viewBox="0 0 56 56" fill="none">
+              <rect x="10" y="14" width="36" height="30" rx="4" fill="#D4A76A"/>
+              <rect x="14" y="18" width="28" height="22" rx="2" fill="#E8C888"/>
+              <path d="M28 4l-8 10h16l-8-10z" fill="#8B7355"/>
+              <line x1="20" y1="28" x2="36" y2="28" stroke="#C8955A" stroke-width="2"/>
+              <line x1="24" y1="32" x2="32" y2="32" stroke="#C8955A" stroke-width="2"/>
+              <circle cx="20" cy="24" r="2" fill="#F5E6C8"/>
+              <circle cx="36" cy="24" r="2" fill="#F5E6C8"/>
+            </svg>
+          </div>
+          <span class="cat-label">糙米杂粮</span>
+        </button>
+        <button class="category-item" onclick="switchToAll('buckwheat')">
+          <div class="category-icon">
+            <svg viewBox="0 0 56 56" fill="none">
+              <ellipse cx="28" cy="32" rx="23" ry="12" fill="#D4C4A8"/>
+              <ellipse cx="28" cy="28" rx="19" ry="9" fill="#E8DCC8"/>
+              <path d="M12 24c2-6 6-10 16-10s14 4 16 10" fill="#C8BAA0"/>
+              <path d="M16 22c1-4 4-7 12-7s11 3 12 7" fill="#B0A090"/>
+              <path d="M22 32c1 4 3 7 6 7s5-3 6-7" stroke="#8B7355" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M18 30c1 3 2 5 5 5s4-2 5-5" stroke="#8B7355" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <path d="M28 26c1 2 2 4 5 4s4-2 4-4" stroke="#8B7355" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <span class="cat-label">荞麦面条</span>
+        </button>
+      </div>
+
+
+
+      <!-- 今日疯抢 -->
+      <div class="section-header">
+        <span class="section-title">今日疯抢</span>
+      </div>
+      <div class="rush-scroll">
+        <div class="rush-card" onclick="openDetail(0)">
+          <div class="rush-img" style="background-image:url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=400&fit=crop')"></div>
+          <div class="rush-info">
+            <span class="rush-name">有机燕麦片</span>
+            <span class="rush-price">&yen;39.9</span>
+          </div>
+        </div>
+        <div class="rush-card" onclick="openDetail(1)">
+          <div class="rush-img" style="background-image:url('https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop')"></div>
+          <div class="rush-info">
+            <span class="rush-name">三色藜麦</span>
+            <span class="rush-price">&yen;55.0</span>
+          </div>
+        </div>
+        <div class="rush-card" onclick="openDetail(5)">
+          <div class="rush-img" style="background-image:url('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop')"></div>
+          <div class="rush-info">
+            <span class="rush-name">燕麦麸皮粉</span>
+            <span class="rush-price">&yen;42.0</span>
+          </div>
+        </div>
+        <div class="rush-card" onclick="openDetail(4)">
+          <div class="rush-img" style="background-image:url('https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop')"></div>
+          <div class="rush-info">
+            <span class="rush-name">混合谷物脆片</span>
+            <span class="rush-price">&yen;35.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 燕麦专场 -->
+      <div class="section-header">
+        <span class="section-title">燕麦专场</span>
+      </div>
+      <div class="oat-banner" style="background-image:url('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&h=320&fit=crop')">
+        <div class="oat-banner-overlay">
+          <div class="oat-banner-title">燕麦专场</div>
+          <div class="oat-banner-subtitle">精选优质燕麦 健康每一天</div>
+        </div>
+      </div>
+
+      <!-- 人气推荐 -->
+      <div class="section-header">
+        <span class="section-title">人气推荐</span>
+      </div>
+      <div class="product-grid">
+        <div class="product-card" onclick="openDetail(0)">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop')"></div>
+          <div class="product-info">
+            <div class="product-name">有机即食燕麦片 800g</div>
+            <div class="product-tags"><span class="product-tag">有机认证</span><span class="product-tag hot">热卖</span></div>
+            <div class="product-price-row">
+              <span class="price"><span class="unit">¥</span>49.9</span>
+              <button class="share-text-btn" onclick="event.stopPropagation(); openShare(0)">分享</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card" onclick="openDetail(1)">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop')"></div>
+          <div class="product-info">
+            <div class="product-name">玻利维亚进口三色藜麦 500g</div>
+            <div class="product-tags"><span class="product-tag">进口</span><span class="product-tag hot">热卖</span></div>
+            <div class="product-price-row">
+              <span class="price"><span class="unit">¥</span>68.0</span>
+              <button class="share-text-btn" onclick="event.stopPropagation(); openShare(1)">分享</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新品上市 -->
+      <div class="section-header">
+        <span class="section-title">新品上市</span>
+      </div>
+      <div class="product-grid">
+        <div class="product-card" onclick="openDetail(7)">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=400&fit=crop')"></div>
+          <div class="product-info">
+            <div class="product-name">五谷杂粮礼盒 3kg</div>
+            <div class="product-tags"><span class="product-tag">礼盒装</span></div>
+            <div class="product-price-row">
+              <span class="price"><span class="unit">¥</span>128.0</span>
+              <button class="share-text-btn" onclick="event.stopPropagation(); openShare(7)">分享</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card" onclick="openDetail(8)">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=400&fit=crop')"></div>
+          <div class="product-info">
+            <div class="product-name">发芽糙米 1kg</div>
+            <div class="product-tags"><span class="product-tag">发芽工艺</span></div>
+            <div class="product-price-row">
+              <span class="price"><span class="unit">¥</span>58.0</span>
+              <button class="share-text-btn" onclick="event.stopPropagation(); openShare(8)">分享</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 品质保障 -->
+      <div class="brand-strip">
+        <div class="brand-item">
+          <div class="bi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="bi-title">品质溯源</div>
+          <div class="bi-desc">产地直供可查</div>
+        </div>
+        <div class="brand-item">
+          <div class="bi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="bi-title">有机认证</div>
+          <div class="bi-desc">权威机构检测</div>
+        </div>
+        <div class="brand-item">
+          <div class="bi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="23 7 16 12 23 17 23 7"></polygon></svg>
+          </div>
+          <div class="bi-title">极速配送</div>
+          <div class="bi-desc">48小时直达</div>
+        </div>
+      </div>
+
+      <div class="home-bottom"></div>
+    </div>
+
+    <!-- ====== 全部商品 ====== -->
+    <div class="page" id="page-all">
+      <div class="all-page-layout">
+        <div class="left-cat-panel" id="catSidePanel">
+          <button class="cat-side-item active" data-cat="all" onclick="filterCategory('all', this)">全部</button>
+          <button class="cat-side-item" data-cat="oat" onclick="filterCategory('oat', this)">燕麦系列</button>
+          <button class="cat-side-item" data-cat="quinoa" onclick="filterCategory('quinoa', this)">藜麦系列</button>
+          <button class="cat-side-item" data-cat="rice" onclick="filterCategory('rice', this)">糙米系列</button>
+          <button class="cat-side-item" data-cat="buckwheat" onclick="filterCategory('buckwheat', this)">荞麦系列</button>
+          <button class="cat-side-item" data-cat="mix" onclick="filterCategory('mix', this)">混合谷物</button>
+        </div>
+        <div class="right-product-area">
+          <div class="product-grid" id="allProductGrid" style="padding-bottom:16px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 查单 ====== -->
+    <div class="page" id="page-orders">
+      <div class="order-filter-tabs">
+        <button class="order-filter-tab active" data-oft="all" onclick="filterOrderStatus('all', this)">全部</button>
+        <button class="order-filter-tab" data-oft="completed" onclick="filterOrderStatus('completed', this)">已下单</button>
+        <button class="order-filter-tab" data-oft="canceled" onclick="filterOrderStatus('canceled', this)">已取消</button>
+      </div>
+      <div class="order-date-filter">
+        <span class="date-label">日期选择</span>
+        <div class="order-date-range">
+          <input type="date" class="order-date-input" id="orderDateStart" onchange="applyDateFilter()">
+          <span class="date-sep">至</span>
+          <input type="date" class="order-date-input" id="orderDateEnd" onchange="applyDateFilter()">
+        </div>
+      </div>
+      <div class="order-list" id="orderList"></div>
+    </div>
+
+    <!-- ====== 商品详情 ====== -->
+    <div class="page" id="page-detail">
+      <div class="detail-page-img" id="detailPageImg"></div>
+      <div class="detail-page-info" id="detailPageInfo"></div>
+      <div class="detail-images-grid" id="detailImagesGrid"></div>
+      <div class="detail-share-bar" id="detailShareBar"></div>
+    </div>
+
+    <!-- ====== 搜索 ====== -->
+    <div class="page" id="page-search">
+      <div class="search-page-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" class="search-page-input" id="searchInput" placeholder="搜索全谷物好物" oninput="doSearch()">
+      </div>
+      <div class="search-hot" id="searchHot">
+        <div class="search-hot-title">热门搜索</div>
+        <div class="search-hot-tags">
+          <span class="hot-tag" onclick="quickSearch('燕麦')">燕麦</span>
+          <span class="hot-tag" onclick="quickSearch('藜麦')">藜麦</span>
+          <span class="hot-tag" onclick="quickSearch('糙米')">糙米</span>
+          <span class="hot-tag" onclick="quickSearch('有机')">有机</span>
+          <span class="hot-tag" onclick="quickSearch('礼盒')">礼盒</span>
+          <span class="hot-tag" onclick="quickSearch('荞麦')">荞麦</span>
+        </div>
+      </div>
+      <div class="product-grid" id="searchResultGrid" style="padding-bottom:16px;"></div>
+    </div>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="tab-bar">
+    <button class="tab-item active" data-tab="home" onclick="switchTab('home')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </span>
+      <span>首页</span>
+    </button>
+    <button class="tab-item" data-tab="all" onclick="switchTab('all')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><path d="M2 12h20"></path></svg>
+      </span>
+      <span>全部</span>
+    </button>
+    <button class="tab-item" data-tab="orders" onclick="switchTab('orders')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      </span>
+      <span>查单</span>
+    </button>
+  </div>
+</div>
+
+<!-- 分享面板 -->
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-panel" onclick="event.stopPropagation()">
+    <div class="share-title">分享到</div>
+    <div class="share-options">
+      <button class="share-option" onclick="shareToWechat()">
+        <div class="share-icon-circle wechat">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18z"/></svg>
+        </div>
+        <span>微信好友</span>
+      </button>
+      <button class="share-option" onclick="shareToMoments()">
+        <div class="share-icon-circle moments">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <span>朋友圈</span>
+      </button>
+      <button class="share-option" onclick="generatePoster()">
+        <div class="share-icon-circle poster">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        </div>
+        <span>生成海报</span>
+      </button>
+    </div>
+    <button class="share-cancel" onclick="closeShare()">取消</button>
+  </div>
+</div>
+
+<!-- 海报弹窗 -->
+<div class="poster-modal" id="posterModal">
+  <span class="poster-hint">长按或右键保存海报图片</span>
+  <canvas id="posterCanvas"></canvas>
+  <div class="poster-actions">
+    <button class="poster-btn save" onclick="downloadPoster()">保存图片</button>
+    <button class="poster-btn close" onclick="closePoster()">关闭</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ 商品数据 ============
+const products = [
+  {
+    id: 0, name: '有机即食燕麦片 800g', price: 49.9, category: 'oat',
+    imgClass: 'img-oat',
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop',
+    tags: ['有机认证', '热卖'],
+    desc: '选自澳洲优质燕麦，经传统工艺慢火烘焙，保留燕麦原始香气与营养。即冲即食，口感软糯顺滑，富含膳食纤维，是健康早餐的理想选择。',
+    specs: ['规格：800g/袋', '产地：澳大利亚', '保质期：12个月', '储存：阴凉干燥处']
+  },
+  {
+    id: 1, name: '玻利维亚进口三色藜麦 500g', price: 68.0, category: 'quinoa',
+    imgClass: 'img-green',
+    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+    tags: ['进口', '高蛋白'],
+    desc: '源自玻利维亚安第斯高原的优质三色藜麦，白藜麦、红藜麦、黑藜麦科学配比，口感层次丰富。全营养谷物，富含9种必需氨基酸。',
+    specs: ['规格：500g/袋', '产地：玻利维亚', '保质期：18个月', '储存：密封避光保存']
+  },
+  {
+    id: 2, name: '东北有机糙米 2.5kg', price: 39.9, category: 'rice',
+    imgClass: 'img-grain',
+    image: 'https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=400&h=400&fit=crop',
+    tags: ['有机认证', '东北产地'],
+    desc: '来自东北黑土地的优质糙米，保留完整胚芽和米糠层，富含B族维生素和矿物质。口感Q弹有嚼劲，比精白米更饱腹、更营养。',
+    specs: ['规格：2.5kg/袋', '产地：黑龙江', '保质期：12个月', '储存：阴凉干燥处']
+  },
+  {
+    id: 3, name: '纯苦荞麦粉 1kg', price: 35.0, category: 'buckwheat',
+    imgClass: 'img-warm',
+    image: 'https://images.unsplash.com/photo-1580052614034-c55d20bfee3b?w=400&h=400&fit=crop',
+    tags: ['无添加', '低GI'],
+    desc: '精选大凉山苦荞麦，石磨低温研磨，完整保留苦荞麦的营养成分。富含芦丁（生物类黄酮），适合关注血糖健康的人群。',
+    specs: ['规格：1kg/袋', '产地：四川大凉山', '保质期：12个月', '储存：密封阴凉保存']
+  },
+  {
+    id: 4, name: '混合谷物早餐脆片 400g', price: 45.0, category: 'mix',
+    imgClass: 'img-oat',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop',
+    tags: ['即食', '混合谷物'],
+    desc: '燕麦、玉米、黑麦、大麦四种谷物精心烘焙而成，酥脆可口，搭配牛奶或酸奶即食。0添加蔗糖，使用天然椰糖调味。',
+    specs: ['规格：400g/袋', '产地：山东', '保质期：9个月', '储存：密封防潮']
+  },
+  {
+    id: 5, name: '即食燕麦麸皮粉 500g', price: 55.0, category: 'oat',
+    imgClass: 'img-grain',
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop',
+    tags: ['高纤维', '冲饮'],
+    desc: '100%纯燕麦麸皮研磨，超微粉碎技术，口感细腻更易吸收。每100g含膳食纤维16g，是苹果的6倍。',
+    specs: ['规格：500g/罐', '产地：河北', '保质期：12个月', '储存：密封保存']
+  },
+  {
+    id: 6, name: '有机白藜麦米 1kg', price: 79.0, category: 'quinoa',
+    imgClass: 'img-warm',
+    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop',
+    tags: ['有机认证', '宝宝辅食'],
+    desc: '秘鲁进口有机白藜麦，颗粒饱满色泽纯净，经过12道筛选工艺，去除皂苷，无需浸泡即可烹煮。适合宝宝辅食、减脂餐搭配。',
+    specs: ['规格：1kg/袋', '产地：秘鲁', '保质期：18个月', '储存：密封避光保存']
+  },
+  {
+    id: 7, name: '五谷杂粮礼盒 3kg', price: 128.0, category: 'mix',
+    imgClass: 'img-green',
+    image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&h=400&fit=crop',
+    tags: ['礼盒装', '送礼推荐'],
+    desc: '精选黄豆、黑豆、红豆、绿豆、小米、糙米、燕麦、薏仁八种杂粮，真空小袋独立包装，科学搭配营养均衡。',
+    specs: ['规格：3kg/盒（8袋装）', '产地：多地优选', '保质期：12个月', '储存：阴凉干燥处']
+  },
+  {
+    id: 8, name: '发芽糙米 1kg', price: 58.0, category: 'rice',
+    imgClass: 'img-warm',
+    image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=400&fit=crop',
+    tags: ['发芽工艺', '高GABA'],
+    desc: '通过生物发芽技术激活糙米中的营养成分，GABA（γ-氨基丁酸）含量是普通糙米的10倍。口感更软糯，营养更丰富。',
+    specs: ['规格：1kg/袋', '产地：江苏', '保质期：9个月', '储存：冷藏更佳']
+  },
+  {
+    id: 9, name: '荞麦面条 400g×3袋', price: 42.9, category: 'buckwheat',
+    imgClass: 'img-grain',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+    tags: ['方便速食', '低脂'],
+    desc: '纯荞麦粉制作，不添加小麦粉，荞麦含量100%。低脂低卡，口感劲道爽滑。沸水煮3-5分钟即可食用。',
+    specs: ['规格：400g×3袋', '产地：陕西', '保质期：6个月', '储存：阴凉干燥处']
+  }
+];
+
+const orders = [
+  {
+    id: 'OD20260618001', status: 'completed', statusText: '已完成',
+    date: '2026-06-18 14:32',
+    items: [ { productId: 0, qty: 2 }, { productId: 1, qty: 1 } ],
+    total: 167.8
+  },
+  {
+    id: 'OD20260610002', status: 'completed', statusText: '已完成',
+    date: '2026-06-10 09:15',
+    items: [ { productId: 3, qty: 1 }, { productId: 8, qty: 1 }, { productId: 4, qty: 1 } ],
+    total: 138.0
+  },
+  {
+    id: 'OD20260605003', status: 'shipping', statusText: '配送中',
+    date: '2026-06-05 20:44',
+    items: [ { productId: 5, qty: 2 }, { productId: 9, qty: 1 } ],
+    total: 152.9
+  },
+  {
+    id: 'OD20260528004', status: 'completed', statusText: '已完成',
+    date: '2026-05-28 11:08',
+    items: [ { productId: 7, qty: 1 } ],
+    total: 128.0
+  },
+  {
+    id: 'OD20260515005', status: 'canceled', statusText: '已取消',
+    date: '2026-05-15 16:20',
+    items: [ { productId: 2, qty: 1 }, { productId: 6, qty: 1 } ],
+    total: 118.9
+  },
+  {
+    id: 'OD20260422006', status: 'canceled', statusText: '已取消',
+    date: '2026-04-22 10:55',
+    items: [ { productId: 4, qty: 3 } ],
+    total: 135.0
+  },
+  {
+    id: 'OD20260410007', status: 'completed', statusText: '已完成',
+    date: '2026-04-10 08:30',
+    items: [ { productId: 1, qty: 1 }, { productId: 9, qty: 2 } ],
+    total: 153.8
+  },
+  {
+    id: 'OD20260328008', status: 'shipping', statusText: '配送中',
+    date: '2026-03-28 19:12',
+    items: [ { productId: 3, qty: 2 }, { productId: 7, qty: 1 } ],
+    total: 198.0
+  }
+];
+
+const detailImages = [
+  'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1490818387583-4e8b6d1c8a5f?w=400&h=400&fit=crop'
+];
+
+let currentTab = 'home';
+let currentCategory = 'all';
+let shareTargetProduct = null;
+let currentBanner = 0;
+let bannerTimer = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function handleHeaderAction() {
+  switchTab('search');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const page = document.getElementById('page-' + tab);
+  if (page) page.classList.add('active');
+  const tabEl = document.querySelector('.tab-item[data-tab="' + tab + '"]');
+  if (tabEl) tabEl.classList.add('active');
+
+  document.getElementById('headerTitle').textContent = '明公诺千·全谷物大健康';
+  const backBtn = document.getElementById('backBtn');
+  const tabBar = document.querySelector('.tab-bar');
+  const mainContent = document.getElementById('mainContent');
+  if (tab === 'detail') {
+    backBtn.classList.add('visible');
+    if (tabBar) tabBar.style.display = 'none';
+    if (mainContent) mainContent.style.paddingBottom = '80px';
+  } else {
+    backBtn.classList.remove('visible');
+    if (tabBar) tabBar.style.display = '';
+    if (mainContent) mainContent.style.paddingBottom = '';
+  }
+
+  if (tab === 'all') renderAllProducts();
+  if (tab === 'orders') renderOrders();
+  if (tab === 'search') renderSearchResults();
+}
+
+function switchToAll(cat) {
+  currentCategory = cat;
+  switchTab('all');
+  setTimeout(() => {
+    document.querySelectorAll('#catSidePanel .cat-side-item').forEach(t => t.classList.remove('active'));
+    const target = document.querySelector('#catSidePanel .cat-side-item[data-cat="' + cat + '"]');
+    if (target) target.classList.add('active');
+    renderAllProducts();
+  }, 100);
+}
+
+function goBack() { switchTab('home'); }
+
+function startBanner() {
+  bannerTimer = setInterval(() => {
+    currentBanner = (currentBanner + 1) % 3;
+    updateBanner();
+  }, 3500);
+}
+
+function updateBanner() {
+  document.getElementById('bannerTrack').style.transform = 'translateX(-' + (currentBanner * 100) + '%)';
+  document.querySelectorAll('#bannerDots .banner-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentBanner);
+  });
+}
+
+document.getElementById('bannerDots').addEventListener('click', function(e) {
+  if (e.target.classList.contains('banner-dot')) {
+    currentBanner = parseInt(e.target.dataset.idx);
+    updateBanner();
+    clearInterval(bannerTimer);
+    startBanner();
+  }
+});
+
+let bannerTouchStart = 0;
+document.getElementById('bannerCarousel').addEventListener('touchstart', function(e) {
+  bannerTouchStart = e.touches[0].clientX;
+  clearInterval(bannerTimer);
+});
+document.getElementById('bannerCarousel').addEventListener('touchend', function(e) {
+  const diff = bannerTouchStart - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) {
+    if (diff > 0) currentBanner = Math.min(currentBanner + 1, 2);
+    else currentBanner = Math.max(currentBanner - 1, 0);
+    updateBanner();
+  }
+  startBanner();
+});
+
+startBanner();
+
+function renderAllProducts() {
+  const grid = document.getElementById('allProductGrid');
+  const filtered = currentCategory === 'all' ? products : products.filter(p => p.category === currentCategory);
+  grid.innerHTML = filtered.map(p =>
+    `<div class="product-card-row" onclick="openDetail(${p.id})">
+      <div class="pr-img" style="background-image:url('${p.image}')"></div>
+      <div class="pr-info">
+        <div class="pr-name">${p.name}</div>
+        <div class="pr-tags">${p.tags.map(t => '<span class="pr-tag' + (t === '热卖' || t === '送礼推荐' ? ' hot' : '') + '">' + t + '</span>').join('')}</div>
+        <div class="pr-price-row">
+          <span class="pr-price"><span class="unit">&yen;</span>${p.price.toFixed(1)}</span>
+          <button class="share-text-btn" onclick="event.stopPropagation(); openShare(${p.id})">分享</button>
+        </div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function filterCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('#catSidePanel .cat-side-item').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderAllProducts();
+}
+
+let searchResults = [];
+
+function doSearch() {
+  const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+  const hotEl = document.getElementById('searchHot');
+  if (keyword === '') {
+    hotEl.style.display = 'block';
+    searchResults = [];
+  } else {
+    hotEl.style.display = 'none';
+    searchResults = products.filter(p => p.name.toLowerCase().includes(keyword));
+  }
+  renderSearchResults();
+}
+
+function quickSearch(kw) {
+  document.getElementById('searchInput').value = kw;
+  doSearch();
+}
+
+function renderSearchResults() {
+  const grid = document.getElementById('searchResultGrid');
+  if (searchResults.length === 0) {
+    const keyword = document.getElementById('searchInput').value.trim();
+    grid.innerHTML = keyword ? '<div class="empty-state" style="padding:40px 0;"><span class="empty-text">未找到相关商品</span></div>' : '';
+    return;
+  }
+  grid.innerHTML = searchResults.map(p =>
+    `<div class="product-card" onclick="openDetail(${p.id})">
+      <div class="product-img" style="background-image:url('${p.image}')"></div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-tags">${p.tags.map(t => '<span class="product-tag' + (t === '热卖' || t === '送礼推荐' ? ' hot' : '') + '">' + t + '</span>').join('')}</div>
+        <div class="product-price-row">
+          <span class="price"><span class="unit">&yen;</span>${p.price.toFixed(1)}</span>
+          <button class="share-text-btn" onclick="event.stopPropagation(); openShare(${p.id})">分享</button>
+        </div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function openDetail(productId) {
+  const p = products.find(pr => pr.id === productId);
+  if (!p) return;
+  document.getElementById('detailPageImg').style.backgroundImage = `url('${p.image}')`;
+  document.getElementById('detailPageInfo').innerHTML =
+    `<div class="detail-name">${p.name}</div>
+    <div class="detail-price"><span class="unit">&yen;</span>${p.price.toFixed(1)}</div>
+    <div class="detail-desc">${p.desc}</div>
+    <div class="detail-specs">${p.specs.map(s => '<span class="spec-tag">' + s + '</span>').join('')}</div>`;
+  document.getElementById('detailImagesGrid').innerHTML =
+    detailImages.map(url => `<div class="detail-image-item" style="background-image:url('${url}')"></div>`).join('');
+  document.getElementById('detailShareBar').innerHTML =
+    `<button class="btn-share" onclick="openShare(${p.id})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+      分享给好友
+    </button>`;
+  switchTab('detail');
+}
+
+function closeDetail() {
+  goBack();
+}
+
+function openShare(productId) {
+  shareTargetProduct = products.find(p => p.id === productId) || products[0];
+  document.getElementById('shareOverlay').classList.add('show');
+}
+
+function closeShare(e) {
+  if (e && e.target !== document.getElementById('shareOverlay')) return;
+  document.getElementById('shareOverlay').classList.remove('show');
+}
+
+function shareToWechat() { closeShare(); showToast('已复制链接，打开微信粘贴即可分享'); }
+function shareToMoments() { closeShare(); showToast('已复制图文，打开微信朋友圈粘贴即可'); }
+
+function generatePoster() {
+  closeShare();
+  const p = shareTargetProduct || products[0];
+  const canvas = document.getElementById('posterCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = 750, rh = 1200;
+  canvas.width = w; canvas.height = rh;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.style.width = Math.min(w / dpr, window.innerWidth * 0.85) + 'px';
+  canvas.style.height = Math.min(rh / dpr, window.innerHeight * 0.60) + 'px';
+
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, rh);
+  bgGrad.addColorStop(0, '#F8F5EF');
+  bgGrad.addColorStop(0.4, '#F0E8D8');
+  bgGrad.addColorStop(1, '#E8DCC8');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, w, rh);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowBlur = 24;
+  roundRect(ctx, 40, 50, w - 80, 480, 20);
+  ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#F0E8D8';
+  roundRect(ctx, 60, 70, w - 120, 320, 14);
+  ctx.fill();
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    ctx.save();
+    roundRect(ctx, 80, 90, w - 160, 280, 14);
+    ctx.clip();
+    ctx.drawImage(img, 80, 90, w - 160, 280);
+    ctx.restore();
+    drawPosterText();
+  };
+  img.onerror = function() { drawPosterText(); };
+  img.src = p.image;
+
+  function drawPosterText() {
+    ctx.fillStyle = '#1C1411';
+    ctx.font = 'bold 34px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    const nameLines = wrapText(ctx, p.name, w - 140, 34);
+    nameLines.forEach((line, i) => { ctx.fillText(line, w / 2, 460 + i * 46); });
+
+    ctx.fillStyle = '#D4533B';
+    ctx.font = 'bold 44px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('¥' + p.price.toFixed(1), w / 2, nameLines.length > 1 ? 570 : 540);
+
+    ctx.fillStyle = '#999';
+    ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('全谷物 · 天然健康', w / 2, nameLines.length > 1 ? 620 : 590);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    const descLines = wrapText(ctx, p.desc, w - 120, 24);
+    descLines.slice(0, 3).forEach((line, i) => { ctx.fillText(line, w / 2, 680 + i * 34); });
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(0,0,0,0.05)';
+    ctx.shadowBlur = 16;
+    roundRect(ctx, 40, 840, w - 80, 180, 20);
+    ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#1C1411';
+    ctx.font = 'bold 26px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('明公诺千', 80, 900);
+    ctx.fillStyle = '#999';
+    ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('全谷物健康食品', 80, 930);
+
+    const qrX = w - 150, qrY = 855;
+    ctx.fillStyle = '#1C1411';
+    roundRect(ctx, qrX, qrY, 100, 100, 8);
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(qrX + 6, qrY + 6, 88, 88);
+    ctx.fillStyle = '#1C1411';
+    for (let row = 0; row < 4; row++)
+      for (let col = 0; col < 4; col++)
+        if ((row + col) % 3 !== 0)
+          ctx.fillRect(qrX + 14 + col * 20, qrY + 14 + row * 20, 10, 10);
+
+    ctx.fillStyle = '#999';
+    ctx.font = '18px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('长按识别小程序码', w / 2, 1060);
+    ctx.fillText('立即查看商品详情', w / 2, 1086);
+    document.getElementById('posterModal').classList.add('show');
+  }
+}
+
+function wrapText(ctx, text, maxWidth, fontSize) {
+  ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+  const words = text.split('');
+  const lines = [];
+  let current = '';
+  for (let i = 0; i < words.length; i++) {
+    const test = current + words[i];
+    if (ctx.measureText(test).width > maxWidth && current.length > 0) {
+      lines.push(current); current = words[i];
+    } else { current = test; }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadPoster() {
+  const canvas = document.getElementById('posterCanvas');
+  const link = document.createElement('a');
+  link.download = '明公诺千-商品海报.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('海报已保存');
+}
+
+function closePoster() {
+  document.getElementById('posterModal').classList.remove('show');
+}
+
+let currentOrderStatus = 'all';
+let currentDateStart = '';
+let currentDateEnd = '';
+
+function filterOrderStatus(status, btn) {
+  currentOrderStatus = status;
+  document.querySelectorAll('#page-orders .order-filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+function applyDateFilter() {
+  const s = document.getElementById('orderDateStart').value;
+  const e = document.getElementById('orderDateEnd').value;
+  currentDateStart = s;
+  currentDateEnd = e;
+  renderOrders();
+}
+
+function renderOrders() {
+  const list = document.getElementById('orderList');
+  let filtered = orders;
+  if (currentOrderStatus === 'completed') filtered = filtered.filter(o => o.status === 'completed');
+  if (currentOrderStatus === 'canceled') filtered = filtered.filter(o => o.status === 'canceled');
+  if (currentDateStart) filtered = filtered.filter(o => o.date >= currentDateStart);
+  if (currentDateEnd) filtered = filtered.filter(o => o.date <= currentDateEnd + ' 23:59:59');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="empty-text">暂无订单记录</span></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(order => {
+    const itemsHtml = order.items.map(item => {
+      const p = products.find(pr => pr.id === item.productId) || products[0];
+      return `<div class="order-product-item">
+        <div class="op-img" style="background-image:url('${p.image}')"></div>
+        <div class="op-info"><div class="op-name">${p.name}</div><div class="op-spec">规格：见商品详情</div>
+        <div class="op-price-row"><span class="op-price">&yen;${p.price.toFixed(1)}</span><span class="op-qty">x${item.qty}</span></div></div>
+      </div>`;
+    }).join('');
+    return `<div class="order-card" onclick="openOrderDetail('${order.id}')">
+      <div class="order-header"><span class="order-no"><span class="label">订单号：</span>${order.id}</span><span class="order-status ${order.status}">${order.statusText}</span></div>
+      <div class="order-products">${itemsHtml}</div>
+      <div class="order-footer"><span class="order-total">共${order.items.reduce((s, i) => s + i.qty, 0)}件 &nbsp;合计 <span class="total-price">&yen;${order.total.toFixed(1)}</span></span></div>
+    </div>`;
+  }).join('');
+}
+
+function openOrderDetail(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  showToast('订单 ' + orderId + '\n下单时间：' + order.date + '\n状态：' + order.statusText);
+}
+
+function shareOrder(orderId) {
+  showToast('已复制订单信息，可分享给好友');
+}
+
+document.getElementById('shareOverlay').addEventListener('click', function(e) { closeShare(e); });
+document.getElementById('posterModal').addEventListener('click', function(e) { if (e.target === this) closePoster(); });
+
+renderAllProducts();
+</script>
+</body>
+</html>
