@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>良久团购 · 团长端</title>
+<title>明公诺千团长端</title>
 <style>
 :root{--bg:#f5f5f5;--card:#fff;--ink:#1a1a2e;--muted:#9ca3af;--rule:#e5e7eb;--accent:#2563eb;--accent2:#0d9488;--danger:#ef4444;--warn:#f59e0b;--success:#10b981;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -305,11 +305,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     </div>
     <div class="order-tabs" id="orderTabs">
       <span class="order-tab active" data-filter="all">全部</span>
-      <span class="order-tab" data-filter="draft">草稿</span>
-      <span class="order-tab" data-filter="confirmed">待上报 <span class="ot-count" id="cntConfirmed"></span></span>
-      <span class="order-tab" data-filter="reported">已上报 <span class="ot-count" id="cntReported"></span></span>
+      <span class="order-tab" data-filter="confirmed">待截单 <span class="ot-count" id="cntConfirmed"></span></span>
+      <span class="order-tab" data-filter="reported">待发货 <span class="ot-count" id="cntReported"></span></span>
       <span class="order-tab" data-filter="shipped">已发货</span>
-      <span class="order-tab" data-filter="delivered">已签收</span>
+      <span class="order-tab" data-filter="delivered">已完成</span>
     </div>
     <div id="orderList"></div>
     <div id="orderEmpty" class="empty-state" style="display:none"><div class="es-icon">📭</div>暂无匹配订单</div>
@@ -330,7 +329,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     <div class="section-title"><span class="dot b"></span>常用功能</div>
     <div class="profile-menu-item" onclick="openQuickEntry()"><div class="pm-left"><span class="pm-icon">✏️</span><span class="pm-label">快速报单</span></div><span class="pm-arrow">›</span></div>
     <div class="profile-menu-item" onclick="openAddressBook()"><div class="pm-left"><span class="pm-icon">📒</span><span class="pm-label">地址簿管理</span></div><span class="pm-arrow">›</span></div>
-    <div class="profile-menu-item" onclick="goToPage('page-orders');switchTab('orders')"><div class="pm-left"><span class="pm-icon">📊</span><span class="pm-label">今日汇总上报</span></div><span class="pm-badge" id="pendingReportBadge" style="display:none">待处理</span><span class="pm-arrow">›</span></div>
     <div class="profile-menu-item" onclick="showToast('功能开发中')"><div class="pm-left"><span class="pm-icon">📋</span><span class="pm-label">历史订单</span></div><span class="pm-arrow">›</span></div>
     <div class="profile-menu-item" onclick="showToast('功能开发中')"><div class="pm-left"><span class="pm-icon">💬</span><span class="pm-label">售后工单</span></div><span class="pm-badge" id="aftersaleBadge" style="display:none">2</span><span class="pm-arrow">›</span></div>
   </div>
@@ -385,28 +383,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       </div>
       <div><input class="of-input" id="entryAddr" placeholder="详细地址（街道/门牌号）" maxlength="120"></div>
     </div>
-
-    <!-- C · 结算区 -->
-    <div class="section">
-      <div class="section-title"><span class="dot c"></span>C · 结算确认</div>
-      <div class="pay-toggle">
-        <label class="toggle-sw"><input type="checkbox" id="entryPaid" onchange="entryPaidToggle()"><span class="toggle-sl"></span></label>
-        <span class="toggle-label unpaid" id="entryPaidLabel">未收款</span>
-      </div>
-      <div class="settle-item"><span class="si-label">零售价 × 数量</span><span class="si-val" id="entryRetail">--</span></div>
-      <div class="settle-item"><span class="si-label">实收金额</span><input class="of-input" type="number" id="entryActual" style="width:120px;text-align:right;font-weight:600;padding:4px 8px;font-size:.84rem" onchange="entryUpdateSettle()" placeholder="自动填充"></div>
-      <div style="border-top:1px dashed var(--rule);margin:6px 0"></div>
-      <div class="settle-item"><span class="si-label">拿货成本</span><span class="si-val" id="entryCost">--</span></div>
-      <div class="settle-item"><span class="si-label">预估利润</span><span class="si-val si-profit" id="entryProfit">--</span></div>
-    </div>
   </div>
 
   <!-- D · Bottom action bar -->
   <div class="entry-bottom-bar">
     <div class="form-actions">
-      <button class="btn btn-outline" onclick="entrySaveDraft()" style="background:#fef3c7;border-color:#fcd34d;color:#92400e">💾 保存草稿</button>
-      <button class="btn btn-accent2" id="btnEntrySave" onclick="entrySaveOrder()" disabled>✅ 保存报单</button>
-      <button class="btn btn-primary" id="btnEntryReport" onclick="entryReportOrder()" disabled>📤 确认上报</button>
+      <button class="btn btn-primary" id="btnEntryReport" onclick="entryReportDirect()" disabled>📤 确认上报</button>
     </div>
   </div>
 </div>
@@ -468,11 +450,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   </div>
 </div>
 
-<!-- Batch report confirm -->
-<div class="modal-overlay" id="batchReportModal">
-  <div class="modal-sheet" id="batchReportSheet"></div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -490,7 +467,6 @@ const products = [
 ];
 
 const mockOrders = [
-  { id:'DRAFT-001', productId:5, spec:'2.5kg', qty:1, retail:32, cost:21, actual:32, name:'待补全', phone:'135****5555', addr:'待填写', status:'draft', time:'09:15', profit:11, date:'2026-06-27', fullDate:'2026-06-27', rawPhone:'', rawProvince:'', rawCity:'', rawDistrict:'', rawDetail:'' },
   { id:'ORD20260627-001', productId:1, spec:'1kg装', qty:2, retail:39, cost:26, actual:78, name:'张三', phone:'138****1111', addr:'广东深圳南山区 科技园路1号', status:'confirmed', time:'14:22', profit:26, date:'2026-06-27', fullDate:'2026-06-27', rawPhone:'13800001111', rawProvince:'广东', rawCity:'深圳', rawDistrict:'南山区', rawDetail:'科技园路1号' },
   { id:'ORD20260627-002', productId:4, spec:'三色混合', qty:1, retail:55, cost:38, actual:55, name:'李四', phone:'139****2222', addr:'浙江杭州西湖区 文三路456号', status:'confirmed', time:'13:05', profit:17, date:'2026-06-27', fullDate:'2026-06-27', rawPhone:'13900002222', rawProvince:'浙江', rawCity:'杭州', rawDistrict:'西湖区', rawDetail:'文三路456号' },
   { id:'ORD20260627-003', productId:2, spec:'8袋装', qty:1, retail:68, cost:46, actual:68, name:'王五', phone:'136****3333', addr:'北京朝阳区 望京SOHO', status:'reported', time:'11:30', profit:22, date:'2026-06-27', fullDate:'2026-06-27', rawPhone:'13600003333', rawProvince:'北京', rawCity:'北京', rawDistrict:'朝阳区', rawDetail:'望京SOHO' },
@@ -708,30 +684,8 @@ function entryQtyChange() {
   entryUpdateSettle();
 }
 
-function entryPaidToggle() {
-  const ck = document.getElementById('entryPaid');
-  const lb = document.getElementById('entryPaidLabel');
-  if (!ck || !lb) return;
-  lb.textContent = ck.checked ? '已收款' : '未收款';
-  lb.className = 'toggle-label ' + (ck.checked ? 'paid' : 'unpaid');
-}
-
 function entryUpdateSettle() {
-  const p = entryProduct;
-  ['entryRetail','entryCost','entryProfit'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = '--';
-  });
-  if (!p) return;
-  const qty = parseInt(document.getElementById('entryQty')?.value) || 1;
-  const totalRetail = p.retail * qty;
-  const elRetail = document.getElementById('entryRetail'); if (elRetail) elRetail.textContent = `¥${totalRetail.toFixed(2)}`;
-  const actualInp = document.getElementById('entryActual');
-  if (actualInp && !actualInp.value) actualInp.value = totalRetail.toFixed(0);
-  const actual = parseFloat(actualInp?.value) || totalRetail;
-  const costTotal = p.cost * qty;
-  const elCost = document.getElementById('entryCost'); if (elCost) elCost.textContent = `¥${costTotal.toFixed(2)}`;
-  const elProfit = document.getElementById('entryProfit'); if (elProfit) elProfit.textContent = `¥${(actual - costTotal).toFixed(2)}`;
+  // Settlement display removed - keep for back-compat (calls from qty change)
 }
 
 function entryUpdateButtons() {
@@ -740,16 +694,13 @@ function entryUpdateButtons() {
   const hasPhone = (document.getElementById('entryPhone')?.value?.trim()?.length || 0) === 11;
   const hasAddr = (document.getElementById('entryAddr')?.value?.trim()?.length || 0) > 0;
   const ok = p && hasName && hasPhone && hasAddr;
-  const btnSave = document.getElementById('btnEntrySave');
   const btnReport = document.getElementById('btnEntryReport');
-  if (btnSave) btnSave.disabled = !ok;
   if (btnReport) btnReport.disabled = !ok;
 }
 
 document.addEventListener('input', function(e) {
-  if (['entryName','entryPhone','entryAddr','entryActual'].includes(e.target.id)) {
-    if (e.target.id === 'entryActual') entryUpdateSettle();
-    else entryUpdateButtons();
+  if (['entryName','entryPhone','entryAddr'].includes(e.target.id)) {
+    entryUpdateButtons();
   }
 });
 
@@ -800,61 +751,24 @@ function setDistrict(dist) {
   setTimeout(() => { const el = document.getElementById('entryDist'); if (el) el.value = dist; }, 160);
 }
 
-// ========== THREE BUTTON ACTIONS ==========
+// ========== ENTRY REPORT ACTION ==========
 function clearReceiverFields() {
   ['entryName','entryPhone','entryAddr'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   const prov = document.getElementById('entryProv'); if (prov) { prov.value = ''; entryProvChange(); }
-  const paid = document.getElementById('entryPaid'); if (paid) { paid.checked = false; entryPaidToggle(); }
-  const actual = document.getElementById('entryActual'); if (actual) actual.value = '';
 }
 
 function clearProductFields() {
   entryProduct = null;
   entrySelectedSpec = null;
-  document.getElementById('entryPaid').checked = false;
-  entryPaidToggle();
-  document.getElementById('entryActual').value = '';
   renderEntryForm();
 }
 
-// 保存草稿：不要求已收款，保存为 DRAFT 状态，订单支持编辑和删除
-function entrySaveDraft() {
+function entryReportDirect() {
   if (!entryProduct) { showToast('请先选择商品'); return; }
-  const order = buildEntryOrder();
-  order.status = 'draft';
-  order.id = 'DRAFT-' + Date.now();
-  mockOrders.unshift(order);
-  clearReceiverFields();
-  showToast('草稿已保存 ✓（可在订单页编辑）');
-  updateAllViews();
-}
-
-// 保存报单：保存为 CONFIRMED（待上报）状态，支持编辑和删除
-function entrySaveOrder() {
-  if (!entryProduct) return;
-  if (document.getElementById('btnEntrySave')?.disabled) return;
-  if (!document.getElementById('entryPaid')?.checked) {
-    if (!confirm('尚未标记「已收款」，确认保存为待上报吗？')) return;
-  }
-  const order = buildEntryOrder();
-  order.status = 'confirmed';
-  order.id = 'ORD' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Date.now() % 10000).toString().padStart(4,'0');
-  mockOrders.unshift(order);
-  clearReceiverFields();
-  showToast('报单已保存，状态：待上报 ✓');
-  updateAllViews();
-}
-
-// 确认上报：保存为 REPORTED（已上报）状态，订单锁定，不可编辑和删除
-function entryReportOrder() {
-  if (!entryProduct) return;
   if (document.getElementById('btnEntryReport')?.disabled) return;
-  if (!document.getElementById('entryPaid')?.checked) {
-    if (!confirm('尚未标记「已收款」，确认上报吗？')) return;
-  }
-  if (!confirm('上报后订单将锁定，不可编辑和删除。确认上报？')) return;
+  if (!confirm('确认上报？上报后订单将锁定。')) return;
   const order = buildEntryOrder();
   order.status = 'reported';
   order.id = 'ORD' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Date.now() % 10000).toString().padStart(4,'0');
@@ -868,7 +782,7 @@ function buildEntryOrder() {
   const p = entryProduct;
   const qtyEl = document.getElementById('entryQty');
   const qty = qtyEl ? (parseInt(qtyEl.value) || 1) : 1;
-  const actual = parseFloat(document.getElementById('entryActual')?.value) || (p.retail * qty);
+  const actual = p.retail * qty;
   const now = new Date();
   const dateStr = now.toISOString().slice(0,10);
   const rawPhone = document.getElementById('entryPhone')?.value?.trim() || '00000000000';
@@ -962,7 +876,7 @@ function doBatchImport() {
         actual: defaultProduct.retail * qty,
         name: name, phone: (phone||'000').slice(0,3) + '****' + (phone||'000').slice(-4),
         addr: province + city + district + ' ' + detail,
-        status: 'draft', time: now.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),
+        status: 'confirmed', time: now.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),
         profit: defaultProduct.retail * qty - defaultProduct.cost * qty,
         date: dateStr, fullDate: dateStr,
         rawPhone: phone, rawProvince: province, rawCity: city, rawDistrict: district, rawDetail: detail,
@@ -971,7 +885,7 @@ function doBatchImport() {
     }
   });
   document.getElementById('batchImportModal').classList.remove('show');
-  showToast(`批量导入 ${imported} 条草稿 ✓`);
+  showToast(`批量导入 ${imported} 条订单 ✓`);
   updateAllViews();
 }
 
@@ -1058,11 +972,11 @@ function renderOrders(filter, dateFilter) {
 
   document.getElementById('orderList').innerHTML = filtered.map(o => {
     const p = products.find(pr => pr.id === o.productId);
-    const tags = { draft:['草稿','tag-draft'], confirmed:['待上报','tag-confirmed'], reported:['已上报','tag-reported'], shipped:['已发货','tag-shipped'], delivered:['已签收','tag-delivered'] };
+    const tags = { confirmed:['待截单','tag-confirmed'], reported:['待发货','tag-reported'], shipped:['已发货','tag-shipped'], delivered:['已完成','tag-delivered'] };
     const [tagText, tagClass] = tags[o.status] || ['',''];
     const isToday = o.fullDate === today;
     const isLocked = o.status === 'reported' || o.status === 'shipped' || o.status === 'delivered';
-    const isEditable = o.status === 'draft' || o.status === 'confirmed';
+    const isEditable = o.status === 'confirmed';
 
     let actionHTML = '';
     if (isLocked) {
@@ -1091,23 +1005,12 @@ function renderOrders(filter, dateFilter) {
   }).join('') || '<div class="empty-state"><div class="es-icon">📭</div>暂无匹配订单</div>';
 
   const todayOrders = mockOrders.filter(o => o.fullDate === today);
-  const cntConfirmed = todayOrders.filter(o => o.status === 'confirmed').length;
   const cntReported = todayOrders.filter(o => o.status === 'reported').length;
-  document.getElementById('cntConfirmed').textContent = cntConfirmed > 0 ? `(${cntConfirmed})` : '';
   document.getElementById('cntReported').textContent = cntReported > 0 ? `(${cntReported})` : '';
 
   document.querySelectorAll('#orderTabs .order-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.filter === currentOrderFilter);
   });
-
-  if (cntConfirmed > 0) {
-    document.getElementById('orderList').insertAdjacentHTML('afterbegin', `
-      <div class="batch-bar" onclick="openBatchReport()">
-        <div class="bb-text">📤 一键汇总上报</div>
-        <div class="bb-count">${cntConfirmed} 笔待上报订单</div>
-      </div>
-    `);
-  }
 }
 
 // Delete order
@@ -1125,8 +1028,8 @@ function deleteOrder(orderId) {
 function editOrder(orderId) {
   const o = mockOrders.find(or => or.id === orderId);
   if (!o) return;
-  // Must be draft or confirmed to edit
-  if (o.status !== 'draft' && o.status !== 'confirmed') {
+  // Must be confirmed to edit
+  if (o.status !== 'confirmed') {
     showToast('该订单已锁定，无法编辑');
     return;
   }
@@ -1153,43 +1056,16 @@ function editOrder(orderId) {
   showToast('正在编辑订单...');
 }
 
-// Batch report
-function openBatchReport() {
-  const confirmed = mockOrders.filter(o => o.status === 'confirmed' && o.fullDate === currentDateFilter);
-  const total = confirmed.reduce((s,o) => s + o.actual, 0);
-  const profit = confirmed.reduce((s,o) => s + o.profit, 0);
-  document.getElementById('batchReportSheet').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">确认汇总上报</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px">以下 ${confirmed.length} 笔订单将上报至上级「李中批发」，上报后<strong style="color:var(--danger)">不可修改</strong>。</p>
-    ${confirmed.map(o => { const p = products.find(pr => pr.id === o.productId);
-      return `<div style="padding:6px 0;border-bottom:1px solid var(--rule);font-size:.78rem;display:flex;justify-content:space-between"><span>${p?p.icon:'📦'} ${p?p.name:''} ×${o.qty}</span><span style="font-weight:600">¥${o.actual}</span></div>`;
-    }).join('')}
-    <div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;font-size:.9rem"><span>合计</span><span>¥${total}</span></div>
-    <div style="font-size:.78rem;color:var(--accent2);margin-bottom:10px">上报后锁定，预估利润 ¥${profit}</div>
-    <button class="btn btn-primary btn-full" onclick="doBatchReport()">确认上报（演示）</button>
-  `;
-  document.getElementById('batchReportModal').classList.add('show');
-}
-
-function doBatchReport() {
-  mockOrders.forEach(o => { if (o.status === 'confirmed' && o.fullDate === currentDateFilter) o.status = 'reported'; });
-  document.getElementById('batchReportModal').classList.remove('show');
-  showToast(`已上报 ${mockOrders.filter(o => o.status === 'reported' && o.fullDate === currentDateFilter).length} 笔订单 ✓`);
-  updateAllViews();
-}
-
 function openOrderDetail(orderId) {
   const o = mockOrders.find(or => or.id === orderId);
   if (!o) return;
   const p = products.find(pr => pr.id === o.productId);
-  const statusMap = { draft:'草稿', confirmed:'待上报', reported:'已上报', shipped:'已发货', delivered:'已签收' };
+  const statusMap = { confirmed:'待截单', reported:'待发货', shipped:'已发货', delivered:'已完成' };
   const timeline = [
     { label: '团长录单', time: o.time, done: true },
-    { label: '已收款', time: o.time, done: o.status !== 'draft' },
-    { label: '已上报', time: (o.status==='reported'||o.status==='shipped'||o.status==='delivered')?o.time:'', done: o.status==='reported'||o.status==='shipped'||o.status==='delivered' },
+    { label: '待截单', time: (o.status==='reported'||o.status==='shipped'||o.status==='delivered')?o.time:'', done: o.status==='reported'||o.status==='shipped'||o.status==='delivered' },
     { label: '已发货', time: (o.status==='shipped'||o.status==='delivered')?o.fullDate:'', done: o.status==='shipped'||o.status==='delivered' },
-    { label: '已签收', time: o.status==='delivered'?o.fullDate:'', done: o.status==='delivered' },
+    { label: '已完成', time: o.status==='delivered'?o.fullDate:'', done: o.status==='delivered' },
   ];
   document.getElementById('orderDetailSheet').innerHTML = `
     <div class="modal-handle"></div><div class="modal-title">订单详情</div>
@@ -1239,10 +1115,6 @@ function updateAllViews() {
   renderProducts();
   renderData();
   renderOrders(currentOrderFilter);
-  const today = '2026-06-27';
-  const pending = mockOrders.filter(o => o.status === 'confirmed' && o.fullDate === today).length;
-  const badge = document.getElementById('pendingReportBadge');
-  if (badge) badge.style.display = pending > 0 ? 'inline-block' : 'none';
 }
 
 // Init
